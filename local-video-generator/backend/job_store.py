@@ -4,8 +4,17 @@ from datetime import datetime
 from typing import Optional, List, Any
 from sqlmodel import Field, Session, SQLModel, create_engine, select, JSON, Column
 
+import os
+
 # Database setup
-sqlite_file_name = "data/jobs.db"
+# Use absolute path relative to this file to avoid CWD issues
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+sqlite_file_name = os.path.join(DATA_DIR, "jobs.db")
+# SQLite URL requires 3 slashes for relative, 4 for absolute (on *nix), but on Windows it can be tricky.
+# SQLAlchemy handles absolute paths well if we just pass the path.
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}
