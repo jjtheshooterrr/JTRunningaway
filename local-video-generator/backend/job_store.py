@@ -65,12 +65,21 @@ def get_recent_jobs(limit: int = 20, offset: int = 0) -> List[Job]:
 
 def get_next_queued_job() -> Optional[Job]:
     with Session(engine) as session:
-        # Simple implementation: get first queued job
-        # For better concurrency, one might use 'FOR UPDATE' but SQLite support is limited.
-        # Since we have a single worker, this is acceptable.
+        # Find the oldest queued job
         statement = select(Job).where(Job.status == "queued").order_by(Job.created_at.asc()).limit(1)
         job = session.exec(statement).first()
-        return job
+        
+        if job:
+            # "Claim" the job by setting it to running immediately
+            # In a real concurrent DB we'd use FOR UPDATE, but for local SQLite this reduces race conditions
+            # sufficient for a single worker or low concurrency.
+            job.status = "running"
+            job.updated_at = datetime.utcnow()
+            session.add(job)
+            session.commit()
+            session.refresh(job)
+            return job
+        return None
 
 def update_job_status(job_id: str, status: str, **fields: Any):
     with Session(engine) as session:
