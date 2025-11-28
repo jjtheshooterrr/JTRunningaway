@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+pydantic
+pydantic-settings
+sqlalchemy
+diffusers
+transformers
+accelerate
+torch
+torchvision
+safetensors
+imageio
+imageio-ffmpeg
+python-multipart
